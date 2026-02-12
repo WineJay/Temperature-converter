@@ -1,8 +1,6 @@
 from tkinter import *
-from zipfile import error
-
 import all_constants as c
-
+import conversion_rounding as cr
 
 class Converter():
     """
@@ -13,6 +11,8 @@ class Converter():
         """
         Temperature converter GUI
         """
+
+        self.all_calculation_list = []
 
         self.temp_frame = Frame(padx=10, pady=10)
         self.temp_frame.grid()
@@ -37,8 +37,8 @@ class Converter():
                                 )
         self.temp_entry.grid(row=2, padx=10, pady=10)
 
-        error = "Please enter a number"
-        self.answer_error = Label(self.temp_frame, text=error,
+        has_error = "Please enter a number"
+        self.answer_error = Label(self.temp_frame, text=has_error,
                                 fg="#004C99", font=("Arial", 14, "bold"))
         self.answer_error.grid(row=3)
 
@@ -66,7 +66,8 @@ class Converter():
 
             self.button_ref_list.append(self.make_button)
         # retrieve history
-        self.to_history_button = self.button_ref_list[3].config(state=DISABLED)
+        self.to_history_button = (self.button_ref_list[3])
+        self.to_history_button.config(state=DISABLED)
 
     def check_temp(self,min_temp):
         """
@@ -81,35 +82,46 @@ class Converter():
         self.answer_error.config(fg="#004C99", font=("Arial", 13, "bold"))
         self.temp_entry.config(bg="#FFFFFF")
 
-        error = f"Enter a number more than / equal to {min_temp}"
+        has_error = f"Enter a number more than / equal to {min_temp}"
         has_errors = "no"
 
         # checks that the amount to be converted is a number above the absolute zero
         try:
             to_convert = float(to_convert)
             if to_convert >= min_temp:
-                error = ""
-                self.convert(min_temp)
+                has_error = ""
+                self.convert(min_temp, to_convert)
             else:
-                error = "Too Low!"
+                has_error = "Too Low!"
 
         except ValueError:
-            error = "Please enter a number!"
+            has_error = "Please enter a number!"
 
         # display the error if necessary
-        if error != "":
-            self.answer_error.config(text=error, fg="#9C0000")
+        if has_error == "yes":
+            self.answer_error.config(text=has_error, fg="#9C0000", font=("Arial", 10, "bold"))
             self.temp_entry.config(bg="#f4CCCC")
             self.temp_entry.delete(0, END)
 
 
-    def convert(self, min_temp):
-
+    def convert(self, min_temp, to_convert):
+        """
+        Converts temperatures and updates answer label.
+         Also stores calculations for Export / History feature
+        """
         if min_temp == c.ABS_ZERO_CELSIUS:
-            self.answer_error.config(text="Converting {to_convert}°C to °F")
+            answer = cr.to_fahrenheit(to_convert)
+            answer_statement = f"{to_convert}°C is {answer}°F"
+            self.answer_error.config(text=f"{to_convert}°C is {answer}°F")
 
         else:
-            self.answer_error.config(text="Converting {to_convert} °F to °C")
+            answer = cr.to_celsius(to_convert)
+            answer_statement = f"{to_convert} °F is {answer}°C"
+
+        self.answer_error.config(text=answer_statement)
+        self.all_calculation_list.append(answer_statement)
+        print(self.all_calculation_list)
+
 # main routine
 if __name__ == "__main__":
     root = Tk()
