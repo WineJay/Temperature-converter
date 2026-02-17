@@ -1,6 +1,8 @@
 from idlelib.history import History
 from tkinter import *
 from functools import partial # To prevent unwanted windows
+import all_constants as c
+
 
 class Converter():
     """
@@ -11,6 +13,22 @@ class Converter():
         """
         Temperature converter GUI
         """
+
+        # five calculations (for testing)
+        self.all_calculations_list = [
+           '10.0 °F is -12°C',
+            '20.0 °F is -7°C',
+            '30.0 °F is -1°C',
+            '40.0 °F is 4°C',
+            '50.0 °F is 10°C'
+        ]
+
+        # Six calculations for testing
+        # self.all_calculations_list = [
+        #     '10.0 °F is -12°C', '20.0 °F is -7°C', '30.0 °F is -1°C', '40.0 °F is 4°C', '50.0 °F is 10°C',
+        #      '60.0 °F is 16°C'
+        # ]
+
         self.temp_frame = Frame(padx=10, pady=10)
         self.temp_frame.grid()
 
@@ -26,14 +44,14 @@ class Converter():
         Opens history dialogue box and disables history button
         (so that user's can't create multiple history boxes).
         """
-        HistoryExport(self)
+        HistoryExport(self, self.all_calculations_list)
 
 class HistoryExport:
 
     """
     Displays history dialogue box
     """
-    def __init__(self, partner):
+    def __init__(self, partner, calculations):
 
         # setup dialogue box and background color
         green_back = "#D5E8D4"
@@ -52,11 +70,37 @@ class HistoryExport:
         self.history_frame = Frame(self.history_box)
         self.history_frame.grid()
 
+        # Background and text for calculation area
+        if len(calculations) <= c.MAX_CALCS:
+            calc_back = "#D5E8D4"
+            calc_amount = "all your"
+
+        else:
+            calc_back = "#FFE6CC"
+            calc_amount = (f"your recent calculations - "
+                           f"showing {c.MAX_CALCS} / {len(calculations)}")
+
         # strings for 'long' labels....
 
-        recent_intro_txt = ("Below are your recent calculations - showing "
-                            "3 / 3 calculations. All Calculations are "
-                            "shown to the nearest degree")
+        recent_intro_txt = (f"Below are {calc_amount} calculations "
+                            "(to the nearest degree).")
+
+        # create string from calculations list (newest calculations first)
+        newest_first_string = ""
+        newest_first_list = list(reversed(calculations))
+
+        if len(newest_first_list) <= c.MAX_CALCS:
+            for item in newest_first_list[:-1]:
+                newest_first_string += item + "\n"
+
+            newest_first_string += newest_first_list[-1]
+
+        #if we have more than 5 items.....
+        else:
+            for item in newest_first_list[:c.MAX_CALCS-1]:
+                newest_first_string += item + "\n"
+
+            newest_first_string += newest_first_list[c.MAX_CALCS - 1]
 
         export_instructions_txt = ("Please push <Export> to save your calculations in files. "
                                    "If the filename already exists, it will be")
@@ -67,7 +111,7 @@ class HistoryExport:
         history_labels_lists = [
             ["History / Export", ("Arial", 16, "bold"), None],
             [recent_intro_txt, ("Arial", 11) , None],
-            ["calculation list", ("Arial", 14) , green_back],
+            [newest_first_string, ("Arial", 14) , calc_back],
             [export_instructions_txt, ("Arial", 11), None]
         ]
 
